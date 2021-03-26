@@ -2,7 +2,7 @@
 # version - Terraform version required
 ##################################################################################
 variable "TF_VERSION" {
-  default = "0.13"
+  default     = "0.13"
   description = "terraform version required for schematics"
 }
 
@@ -273,4 +273,67 @@ variable "tgrefresh_url" {
   type        = string
   default     = ""
   description = "The URL to POST L3 addresses when tgrefresh is triggered"
+}
+
+##################################################################################
+# pkcs11_agent_download_url - IBM Net HSM PKCS11 agent download URL
+##################################################################################
+variable "pkcs11_agent_download_url" {
+  type        = string
+  default     = "https://github.com/IBM-Cloud/hpcs-pkcs11/releases/download/v2.3.90/pkcs11-grep11-amd64.so.2.3.90"
+  description = "IBM Net HSM PKCS11 agent download URL"
+}
+
+##################################################################################
+# pkcs11_nethsm_endpoint - IBM Net HSM endpoint host
+##################################################################################
+variable "pkcs11_nethsm_endpoint" {
+  type        = string
+  default     = ""
+  description = "IBM Net HSM endpoint host"
+}
+
+##################################################################################
+# pkcs11_nethsm_port - IBM Net HSM endpoint port
+##################################################################################
+variable "pkcs11_nethsm_port" {
+  type        = number
+  default     = 0
+  description = "IBM Net HSM endpoint port"
+}
+
+##################################################################################
+# pkcs11_agent_apikey - IBM Net HSM IAM API Key
+##################################################################################
+variable "pkcs11_agent_apikey" {
+  type        = string
+  default     = ""
+  description = "IBM Net HSM IAM API Key"
+}
+
+##################################################################################
+# pkcs11_instance_id - IBM Net HSM Instance ID
+##################################################################################
+variable "pkcs11_instance_id" {
+  type        = string
+  default     = ""
+  description = "IBM Net HSM Instance ID"
+}
+
+##################################################################################
+# pkcs11_keystore_id - IBM Net HSM Keystore ID
+##################################################################################
+variable "pkcs11_keystore_id" {
+  type        = string
+  default     = ""
+  description = "IBM Net HSM Keystore ID"
+}
+
+##################################################################################
+# pkcs11_agent_log_level  - IBM Net HSM Agent Log Level 
+##################################################################################
+variable "pkcs11_agent_log_level" {
+  type        = string
+  default     = "info"
+  description = "IBM Net HSM Agemt Log Level"
 }

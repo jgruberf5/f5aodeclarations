@@ -1,0 +1,41 @@
+tokens:
+ 0:
+   grep11connection:
+     address: "${pkcs11_nethsm_endpoint}"
+     port: "${pkcs11_nethsm_port}"
+     tls:
+       enabled: true
+       mutual: false
+   storage:
+     filestore:
+       enabled: false
+     remotestore:
+       enabled: true
+   users:
+     0: 
+       name: "Administrator"
+       tokenspaceID: "${pkcs11_keystore_id}"
+       iamauth:
+         enabled: true
+         endpoint: "https://iam.cloud.ibm.com"
+         apikey: "${pkcs11_agent_apikey}"
+         instance: "${pkcs11_instance_id}"
+     1: 
+       name: "Normal user"
+       tokenspaceID: "${pkcs11_keystore_id}"
+       iamauth:
+         enabled: true
+         endpoint: "https://iam.cloud.ibm.com"
+         apikey: "${pkcs11_agent_apikey}"
+         instance: "${pkcs11_instance_id}"
+     2: 
+       name: "Anonymous"
+       tokenspaceID: "${pkcs11_keystore_id}"
+       iamauth:
+         enabled: true
+         endpoint: "https://iam.cloud.ibm.com"
+         apikey: "${pkcs11_agent_apikey}"
+         instance: "${pkcs11_instance_id}" 
+logging:
+ loglevel: ${pkcs11_agent_loglevel}
+ logpath: /var/log/grep11client.log

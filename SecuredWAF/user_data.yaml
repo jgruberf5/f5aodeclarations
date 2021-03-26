@@ -10,7 +10,7 @@ write_files:
   content: |
     ${grep11client_config}
 runcmd:
-  - [ /bin/curl, -L, '${pkcs11agent_url}', --silent, --create-dirs, --output, '/opt/cloudhsm/lib/${pkcs11agent_basename}' ]
+  - [ /bin/curl, -L, '${pkcs11_agent_download_url}', --silent, --create-dirs, --output, '/opt/cloudhsm/lib/${pkcs11agent_basename}' ]
   - [ tmsh, create, sys, crypto, fips, external-hsm, pkcs11-lib-path, '/opt/cloudhsm/lib/${pkcs11agent_basename}', vendor, auto]
   - [ tmsh, create, sys, crypto, fips, nethsm-partition, auto, password, '${pkcs11agent_password}']
   - [ tmsh, save, sys, config ]

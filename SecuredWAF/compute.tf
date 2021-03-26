@@ -76,7 +76,7 @@ locals {
         licenseType: regKey
         regKey: ${var.byol_license_basekey}
 EOD
-  do_regekypool = <<EOD
+  do_regekypool   = <<EOD
 
     schemaVersion: 1.0.0
     class: Device
@@ -94,7 +94,7 @@ EOD
         reachable: false
         hypervisor: kvm
 EOD
-  do_utilitypool = <<EOD
+  do_utilitypool  = <<EOD
 
     schemaVersion: 1.0.0
     class: Device
@@ -122,7 +122,8 @@ locals {
   image_id = data.ibm_is_image.tmos_custom_image.id == null ? lookup(local.public_image_map[var.tmos_image_name], var.region) : data.ibm_is_image.tmos_custom_image.id
   # public image takes priority over custom image
   # image_id = lookup(lookup(local.public_image_map, var.tmos_image_name, {}), var.region, data.ibm_is_image.tmos_custom_image.id)
-  template_file = file("${path.module}/user_data.yaml")
+  pkcs11_config_template = file("${path.module}/pkcs11agentconfig.yaml")
+  template_file          = file("${path.module}/user_data.yaml")
   # user admin_password if supplied, else set a random password
   admin_password = var.tmos_admin_password == "" ? random_password.password.result : var.tmos_admin_password
   # set user_data YAML values or else set them to null for templating
@@ -133,9 +134,9 @@ locals {
   tgactive_url         = var.tgactive_url == "" ? "null" : var.tgactive_url
   tgstandby_url        = var.tgstandby_url == "" ? "null" : var.tgstandby_url
   tgrefresh_url        = var.tgrefresh_url == "" ? "null" : var.tgrefresh_url
-  do_dec1              = var.license_type == "byol" ? chomp(local.do_byol_license): "null"
-  do_dec2              = var.license_type == "regkeypool" ? chomp(local.do_regekypool): local.do_dec1
-  do_local_declaration = var.license_type == "utilitypool" ? chomp(local.do_utilitypool): local.do_dec2 
+  do_dec1              = var.license_type == "byol" ? chomp(local.do_byol_license) : "null"
+  do_dec2              = var.license_type == "regkeypool" ? chomp(local.do_regekypool) : local.do_dec1
+  do_local_declaration = var.license_type == "utilitypool" ? chomp(local.do_utilitypool) : local.do_dec2
   # default_route_interface
   default_route_interface = var.default_route_interface == "" ? "1.${length(local.secondary_subnets)}" : var.default_route_interface
 }
@@ -151,29 +152,45 @@ data "ibm_is_subnet" "default_route_subnet" {
 locals {
   default_gateway_ipv4_address = cidrhost(data.ibm_is_subnet.default_route_subnet.ipv4_cidr_block, 1)
 }
+# PKCS11 agent configuration YAML
+data "template_file" "pkcs11agentconfig" {
+  template = local.pkcs11_config_template
+  vars = {
+    pkcs11_nethsm_endpoint = var.pkcs11_nethsm_endpoint
+    pkcs11_nethsm_port     = var.pkcs11_nethsm_port
+    pkcs11_agent_apikey    = var.pkcs11_agent_apikey
+    pkcs11_keystore_id     = var.pkcs11_keystore_id
+    pkcs11_instance_id     = var.pkcs11_instance_id
+    pkcs11_agent_loglevel  = var.pkcs11_agent_log_level
+  }
+}
 
 data "template_file" "user_data" {
   template = local.template_file
   vars = {
-    tmos_admin_password     = local.admin_password
-    configsync_interface    = "1.1"
-    hostname                = var.hostname
-    domain                  = var.domain
-    default_route_interface = local.default_route_interface
-    default_route_gateway   = local.default_gateway_ipv4_address
-    do_local_declaration    = local.do_local_declaration
-    do_declaration_url      = local.do_declaration_url
-    as3_declaration_url     = local.as3_declaration_url
-    ts_declaration_url      = local.ts_declaration_url
-    phone_home_url          = local.phone_home_url
-    tgactive_url            = local.tgactive_url
-    tgstandby_url           = local.tgstandby_url
-    tgrefresh_url           = local.tgrefresh_url
-    template_source         = var.template_source
-    template_version        = var.template_version
-    zone                    = data.ibm_is_subnet.f5_management_subnet.zone
-    vpc                     = data.ibm_is_subnet.f5_management_subnet.vpc
-    app_id                  = var.app_id
+    tmos_admin_password       = local.admin_password
+    configsync_interface      = "1.1"
+    hostname                  = var.hostname
+    domain                    = var.domain
+    default_route_interface   = local.default_route_interface
+    default_route_gateway     = local.default_gateway_ipv4_address
+    do_local_declaration      = local.do_local_declaration
+    do_declaration_url        = local.do_declaration_url
+    as3_declaration_url       = local.as3_declaration_url
+    ts_declaration_url        = local.ts_declaration_url
+    phone_home_url            = local.phone_home_url
+    tgactive_url              = local.tgactive_url
+    tgstandby_url             = local.tgstandby_url
+    tgrefresh_url             = local.tgrefresh_url
+    template_source           = var.template_source
+    template_version          = var.template_version
+    zone                      = data.ibm_is_subnet.f5_management_subnet.zone
+    vpc                       = data.ibm_is_subnet.f5_management_subnet.vpc
+    app_id                    = var.app_id
+    pkcs11_agent_download_url = var.pkcs11_agent_download_url
+    pkcs11agent_basename      = basename(var.pkcs11_agent_download_url)
+    pkcs11agent_password      = var.pkcs11_agent_apikey
+    grep11client_config       = indent(4, data.template_file.pkcs11agentconfig.rendered)
   }
 }
 
